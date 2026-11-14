@@ -1,0 +1,30 @@
+# APNs Push Relay - Apache configuration (Apache 2.4+)
+
+Options -Indexes
+DirectoryIndex index.php
+
+# Only index.php is reachable over HTTP. Everything else in this directory
+# (config.php, the .p8 key, the SQLite database, error.log, lib/, tests/,
+# dotfiles) is denied, so a missing rule can't expose a secret.
+<FilesMatch ".*">
+    Require all denied
+</FilesMatch>
+<Files "index.php">
+    Require all granted
+</Files>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # If the relay lives behind an Alias or rewrites misbehave, set this to the
+    # URL path of this directory, e.g. RewriteBase /push/
+    # RewriteBase /push/
+
+    # Pass the Authorization header through to PHP (needed on CGI/FastCGI).
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Route every path (e.g. /health, /alert) to index.php.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
