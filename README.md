@@ -1,4 +1,5 @@
 # APNs Push Relay
+[![CI](https://github.com/robert-e-roy/apns-push-relay/actions/workflows/ci.yml/badge.svg)](https://github.com/robert-e-roy/apns-push-relay/actions/workflows/ci.yml)
 
 A small, dependency-free PHP service that stores Apple Push Notification
 service (APNs) device tokens and relays alert notifications to them. It is
