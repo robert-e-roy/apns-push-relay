@@ -188,12 +188,20 @@ final class Database implements ProviderTokenCache
 
     public function getAllDevices(): array
     {
-        return $this->pdo->query('
+        // PHP < 8.1 returns SQLite integers as strings; normalise the types.
+        $rows = $this->pdo->query('
             SELECT device_token, registered_at, last_push_at, push_count, app_version,
                    device_name, is_active, failure_count, last_error, deactivated_at
             FROM devices
             ORDER BY registered_at DESC
         ')->fetchAll();
+        foreach ($rows as &$row) {
+            foreach (['push_count', 'is_active', 'failure_count'] as $col) {
+                $row[$col] = (int)$row[$col];
+            }
+        }
+        unset($row);
+        return $rows;
     }
 
     public function countActiveDevices(): int
